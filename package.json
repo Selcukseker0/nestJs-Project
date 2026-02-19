@@ -18,7 +18,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "docs:typedoc": "typedoc --entryPoints src --out docs/typedoc --tsconfig tsconfig.json --exclude '**/*.spec.ts'"
+    "docs:typedoc": "typedoc --entryPoints src --out docs/typedoc --tsconfig tsconfig.json --exclude '**/*.spec.ts'",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run typeorm -- migration:generate -d typeorm.config.ts",
+    "migration:run": "npm run typeorm -- migration:run -d typeorm.config.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d typeorm.config.ts"
   },
   "dependencies": {
     "@keyv/redis": "^5.1.6",
