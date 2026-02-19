@@ -1,0 +1,5 @@
+{
+    "NOT_EMPTY": "This field cannot be empty.",
+    "INVALID_ENUM": "Invalid status selected (Must be TODO, IN_PROGRESS or DONE).",
+    "INVALID_DATE": "Invalid date format (ISO 8601 expected)."
+}

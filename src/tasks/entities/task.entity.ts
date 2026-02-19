@@ -25,15 +25,12 @@ description: string;
 })
 status: TaskStatus;
 
-  // Senin istediğin Expire Time (Bitiş Süresi)
 @Column({ type: 'timestamp', nullable: true })
 expireTime: Date;
 
-  // Bu görevin sahibi kim? (Relationship)
 @ManyToOne(() => User, (user) => user.tasks, { onDelete: 'CASCADE' })
 user: User;
 
-  // Otomatik zaman damgaları
 @CreateDateColumn()
 createdAt: Date;
 

@@ -11,9 +11,9 @@ constructor(private configService: ConfigService) {
         throw new Error('JWT_SECRET environment variable is not set');
     }
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: secret,
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    ignoreExpiration: false,
+    secretOrKey: secret,
     });
 }
 async validate(payload: any) {

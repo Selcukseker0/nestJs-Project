@@ -1,0 +1,7 @@
+{
+  "created": "Görev başarıyla oluşturuldu.",
+  "deleted": "Görev başarıyla silindi.",
+  "not_found": "{id} numaralı görev bulunamadı.",
+  "updated": "Görev güncellendi.",
+  "list_empty": "Henüz hiç görev eklenmemiş."
+}

@@ -5,11 +5,11 @@ import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { Task } from './entities/task.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { Alarm } from '../alarms/entities/alarm.entity';
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([Task]),
+    TypeOrmModule.forFeature([Task, Alarm]),
     ClientsModule.registerAsync([
       {
         name: 'TASK_SERVICE',
