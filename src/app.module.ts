@@ -4,28 +4,22 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { TasksModule } from './tasks/tasks.module';
-import { Task } from './tasks/entities/task.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { HealthModule } from "./common/health/health.module";
-import { Alarm } from './alarms/entities/alarm.entity';
 import { 
   I18nModule, 
   AcceptLanguageResolver, 
   HeaderResolver, 
   QueryResolver, 
-  I18nValidationPipe, 
-  I18nValidationExceptionFilter 
+  I18nValidationPipe,  
 } from 'nestjs-i18n';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_PIPE } from '@nestjs/core';
 import * as path from 'path';
-
-// Redis store için
 import Keyv from 'keyv';
 const KeyvRedis = require('keyv-redis');
 
@@ -46,7 +40,7 @@ const KeyvRedis = require('keyv-redis');
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      imports: [ConfigModule, HealthModule],
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         stores: [
@@ -71,8 +65,9 @@ const KeyvRedis = require('keyv-redis');
         username: config.get('DB_USER'),
         password: config.get('DB_PASS'),
         database: config.get('DB_NAME'),
-        entities: [User, Task, Alarm],
-        synchronize: config.get('DB_SYNC') === 'true',
+        entities: [__dirname + '/**/*.entity{.ts,.js}'], 
+        synchronize: false,
+        migrationsRun: true,
       }),
     }),
   ],
@@ -83,14 +78,6 @@ const KeyvRedis = require('keyv-redis');
     {
       provide: APP_PIPE,
       useClass: I18nValidationPipe,
-    },
-    {
-      provide: APP_FILTER,
-      useFactory: () => {
-        return new I18nValidationExceptionFilter({
-          detailedErrors: true,
-        });
-      },
     },
   ],
 })

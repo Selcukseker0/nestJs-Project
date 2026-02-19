@@ -1,5 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
-import { HealthCheckService, TypeOrmHealthIndicator, HealthCheck, MicroserviceHealthIndicator } from '@nestjs/terminus';
+import { 
+HealthCheckService, 
+TypeOrmHealthIndicator, 
+HealthCheck, 
+MicroserviceHealthIndicator,
+  MemoryHealthIndicator, // Yeni eklendi
+  DiskHealthIndicator   // Yeni eklendi
+} from '@nestjs/terminus';
 import { Transport } from '@nestjs/microservices';
 
 @Controller('health')
@@ -8,6 +15,8 @@ constructor(
     private health: HealthCheckService,
     private db: TypeOrmHealthIndicator,
     private microservice: MicroserviceHealthIndicator,
+    private memory: MemoryHealthIndicator, 
+    private disk: DiskHealthIndicator,
 ) {}
 
 @Get()
@@ -23,6 +32,7 @@ check() {
         transport: Transport.KAFKA,
         options: { client: { brokers: ['localhost:9092'] } },
     }),
+    () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
     ]);
 }
 }
