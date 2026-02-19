@@ -6,28 +6,31 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { ClientKafka } from '@nestjs/microservices'; // Kafka Client'ı ekledik
+import { ClientKafka } from '@nestjs/microservices';
+import { Alarm } from '../alarms/entities/alarm.entity';
 
 @Injectable()
-export class TasksService implements OnModuleInit { // OnModuleInit ekledik
+export class TasksService implements OnModuleInit {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    // Modülde tanımladığımız ismi buraya enjekte ediyoruz
-    @Inject('TASK_SERVICE') private readonly kafkaClient: ClientKafka,
+    
+    @InjectRepository(Alarm)
+    private alarmRepo: Repository<Alarm>,
+    
+    @Inject(CACHE_MANAGER) 
+    private cacheManager: Cache,
+    
+    @Inject('TASK_SERVICE') 
+    private readonly kafkaClient: ClientKafka,
   ) {}
-
-  // Uygulama başlarken Kafka broker'ına el sıkışmaya git
   async onModuleInit() {
     await this.kafkaClient.connect();
-    console.log('📡 Kafka Producer Bağlantısı Kuruldu!');
   }
 
   private getCacheKey(userId: number): string {
     return `tasks_user_${userId}`;
   }
-
   async create(createTaskDto: CreateTaskDto, userId: number) {
     const task = this.taskRepository.create({
       ...createTaskDto,
@@ -35,26 +38,22 @@ export class TasksService implements OnModuleInit { // OnModuleInit ekledik
     });
     const savedTask = await this.taskRepository.save(task);
     
-    // Redis temizliği
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // KAFKA: Görev oluşturuldu mesajını fırlat
     this.kafkaClient.emit('task.created', {
       taskId: savedTask.id,
       title: savedTask.title,
       userId: userId,
       timestamp: new Date().toISOString()
     });
-    console.log('📨 Kafka: task.created mesajı fırlatıldı!');
-
     return savedTask;
   }
 
   async findAll(userId: number) {
     const cacheKey = this.getCacheKey(userId);
     const cachedTasks = await this.cacheManager.get(cacheKey);
+    
     if (cachedTasks) {
-      console.log('🚀 Veriler REDIS üzerinden getirildi!');
       return cachedTasks;
     }
 
@@ -64,7 +63,6 @@ export class TasksService implements OnModuleInit { // OnModuleInit ekledik
     });
 
     await this.cacheManager.set(cacheKey, tasks, 600000);
-    console.log('📦 Veriler DB üzerinden getirildi ve Redis\'e yazıldı.');
     
     return tasks;
   }
@@ -73,7 +71,7 @@ export class TasksService implements OnModuleInit { // OnModuleInit ekledik
     const task = await this.taskRepository.findOne({
       where: { id, user: { id: userId } },
     });
-    if (!task) throw new NotFoundException('Görev bulunamadı!');
+    if (!task) throw new NotFoundException('Görev bulunamadı veya bu yetkiye sahip değilsiniz!');
     return task;
   }
 
@@ -84,8 +82,12 @@ export class TasksService implements OnModuleInit { // OnModuleInit ekledik
 
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // KAFKA: Güncelleme olayını bildir
-    this.kafkaClient.emit('task.updated', { taskId: id, userId });
+    this.kafkaClient.emit('task.updated', { 
+      taskId: id, 
+      userId, 
+      title: updatedTask.title,
+      timestamp: new Date().toISOString() 
+    });
     
     return updatedTask;
   }
@@ -96,9 +98,22 @@ export class TasksService implements OnModuleInit { // OnModuleInit ekledik
 
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // KAFKA: Silme olayını bildir
-    this.kafkaClient.emit('task.removed', { taskId: id, userId });
+    this.kafkaClient.emit('task.removed', { 
+        taskId: id, 
+        userId,
+        timestamp: new Date().toISOString() 
+    });
     
     return { message: 'Görev başarıyla silindi' };
+  }
+
+  async saveAlarm(payload: any, type: string) {
+    const alarm = this.alarmRepo.create({
+      type: type,
+      userId: payload.userId,
+      payload: payload,
+    });
+    
+    await this.alarmRepo.save(alarm);
   }
 }

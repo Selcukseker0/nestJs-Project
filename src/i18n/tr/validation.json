@@ -1,0 +1,5 @@
+{
+    "NOT_EMPTY": "Bu alan boş bırakılamaz.",
+    "INVALID_ENUM": "Geçersiz durum seçildi (TODO, IN_PROGRESS veya DONE olmalı).",
+    "INVALID_DATE": "Geçersiz tarih formatı (ISO 8601 bekleniyor)."
+}

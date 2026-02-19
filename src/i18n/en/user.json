@@ -1,0 +1,8 @@
+{
+"created": "User successfully created.",
+"deleted": "User successfully deleted.",
+"found": "User found.",
+"all_listed": "All users listed.",
+"not_found": "User not found (ID: {id}).",
+"email_exists": "This email address is already in use."
+}

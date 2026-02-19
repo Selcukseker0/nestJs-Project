@@ -1,0 +1,8 @@
+{
+"created": "Kullanıcı başarıyla oluşturuldu.",
+"deleted": "Kullanıcı başarıyla silindi.",
+"found": "Kullanıcı bulundu.",
+"all_listed": "Tüm kullanıcılar listelendi.",
+"not_found": "Kullanıcı bulunamadı (ID: {id}).",
+"email_exists": "Bu email adresi zaten kullanımda."
+}

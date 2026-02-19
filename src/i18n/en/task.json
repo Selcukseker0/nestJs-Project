@@ -1,0 +1,7 @@
+{
+  "created": "Task created successfully.",
+  "deleted": "Task deleted successfully.",
+  "not_found": "Task with ID {id} not found.",
+  "updated": "Task updated successfully.",
+  "list_empty": "No tasks have been added yet."
+}
